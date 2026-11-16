@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  portfolio:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    container_name: tori-portfolio
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - FLAP_ENGINE=rust
+      - HOST=0.0.0.0
+      - PORT=8000
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_USERNAME=revamptori
+      - CACHE_TTL_SECONDS=300
+      - REFRESH_COOLDOWN_SECONDS=15
+      - LOG_LEVEL=INFO
+    env_file:
+      - ../.env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
